@@ -52,10 +52,10 @@
     docker: image="ckan/postgresql" name="db" state=running
     sudo: yes
 
-  - name: Run postgresql image
+  - name: Run solr image
     docker: image="ckan/solr" name="solr" state=running
     sudo: yes
 
-  - name: Run postgresql image
-    docker: image="ckan/ckan" name="ckan" ports="80:80" links=['db:db','solr:solr'] state=running
+  - name: Run ckan image
+    docker: image="ckan/ckan" name="ckan" ports="80:80" links=db:db,solr:solr state=running
     sudo: true
