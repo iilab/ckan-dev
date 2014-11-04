@@ -1,0 +1,27 @@
+---
+- hosts: all
+  tasks:
+  - name: add the wheezy-backports repository
+    apt_repository: repo='deb http://http.debian.net/debian wheezy-backports main' state=present
+    sudo: yes
+
+  - name: Install Kernel-3.14
+    apt: pkg=linux-image-amd64 state=present default_release=wheezy-backports update_cache=true
+    sudo: yes
+
+  - name: Install curl
+    apt: pkg=curl state=present
+    sudo: yes
+
+### Doesn't work for some reason. Do 'vagrant ssh' and execute "/usr/bin/curl -sSL https://get.docker.com/ | sh" manually
+#  - name: Use get docker script
+#    shell: '"/usr/bin/curl -sSL https://get.docker.com/ | sh" creates=/usr/bin/docker'
+#    sudo: yes
+
+  - name: Run docker as a service
+    service: name=docker enabled=yes state=started
+    sudo: yes
+
+  - name: Prefetch images
+    shell: "echo postgresql solr ckan | xargs -n1 -IIMG docker pull ckan/IMG"
+    sudo: true
