@@ -1,25 +1,6 @@
 ---
 - hosts: all
   tasks:
-  - name: add the wheezy-backports repository
-    apt_repository: repo='deb http://http.debian.net/debian wheezy-backports main' state=present
-    sudo: yes
-
-  - name: Install Kernel-3.14
-    apt: pkg=linux-image-amd64 state=present default_release=wheezy-backports update_cache=true
-    register: updated_kernel
-    sudo: yes
-
-  - name: Restart the server after partition update  
-    command: "shutdown -r now"
-    when: updated_kernel.changed
-    sudo: true
-
-  - name: Wait for server to come up after partition update  
-    local_action: wait_for host={{ansible_ssh_host}} port={{ansible_ssh_port}} delay=30
-    when: updated_kernel.changed
-    sudo: false
-
   - name: Docker | Install apt dependencies for ansible apt
     apt:
       pkg: "{{ item }}"
@@ -27,17 +8,20 @@
     with_items:
       - python-apt
       - apt-transport-https
+    sudo: yes
 
   - name: Docker | Add docker.io apt key
     apt_key:
       keyserver: 'keyserver.ubuntu.com'
       id: A88D21E9
       state: present
+    sudo: yes
 
   - name: Docker | Add docker.io ubuntu apt repository
     apt_repository:
       repo: 'deb https://get.docker.io/ubuntu docker main'
       state: present
+    sudo: yes
 
   - name: Docker | Make sure docker and its dependencies are installed
     apt:
@@ -45,6 +29,7 @@
       state: present
     with_items:
       - lxc-docker
+    sudo: yes
 
   - name: Clone docker-py repository
     git: repo=https://github.com/docker/docker-py.git dest=/opt/docker-py
