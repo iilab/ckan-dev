@@ -18,7 +18,7 @@ vagrant box add ffuenf/debian-7.7.0-amd64 https://googledrive.com/host/0B83ZToJ3
 ```
   * (```vagrant provision```) Only necessary if you modify the playbook or need to provisioning an existing and running vagrant VM.
 
-You should be able to access CKAN at ```https://localhost:8080``` 
+You should be able to access CKAN at ```http://localhost:8080``` 
 
 ## ToDO
 
