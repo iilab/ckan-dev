@@ -1,0 +1,16 @@
+[Unit]
+Description=Solr Service
+
+After=db.service
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+RestartSec=10
+ExecStartPre=-/usr/bin/docker kill solr
+ExecStartPre=-/usr/bin/docker rm solr
+ExecStart=/usr/bin/docker run --name solr ckan/solr 
+ExecStop=/usr/bin/docker stop solr
+
+[Install]
+WantedBy=multi-user.target

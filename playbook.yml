@@ -1,6 +1,36 @@
 ---
 - hosts: all
   tasks:
+  - name: Install Systemd for managing docker and job scheduling
+    apt: pkg=systemd state=present
+    sudo: yes
+
+  - name: Install systemd in Grub
+    lineinfile: dest=/etc/default/grub 'regexp=^GRUB_CMDLINE_LINUX=\"((?!.*?init=/bin/systemd).*?)\"$' 'line=GRUB_CMDLINE_LINUX="\1 init=/bin/systemd"' state=present backrefs=yes
+    register: updated_grub
+    sudo: yes
+
+  - name: Update grub 
+    command: update-grub
+    when: updated_grub.changed
+    sudo: yes
+
+  - name: Restart the server after update grub 
+    command: "shutdown -r now"
+    when: updated_grub.changed
+    sudo: yes
+
+  # from http://stackoverflow.com/questions/22534033/how-can-i-use-ansible-playbook-to-reboot-a-ubuntu-server
+  # this bit doesn't work
+  # - name: Wait until the virtual machine stop ie. ssh port stop responding
+  #  local_action: wait_for host={{ansible_ssh_host}} port={{ansible_ssh_port}} state=stopped
+  #  sudo: false
+
+  - name: Wait for server to come up after update grub 
+    local_action: wait_for host={{ansible_ssh_host}} port={{ansible_ssh_port}} delay=30
+    when: updated_grub.changed
+    sudo: false
+
   - name: Docker | Install apt dependencies for ansible apt
     apt:
       pkg: "{{ item }}"
@@ -48,14 +78,42 @@
 # docker run -d --name solr ckan/solr
 # docker run -d -p 80:80 --link db:db --link solr:solr ckan/ckan
 
-  - name: Run postgresql image
-    docker: image="ckan/postgresql" name="db" state=running
+#  - name: Run postgresql image
+#    docker: image="ckan/postgresql" name="db" state=running
+#    sudo: yes
+
+#  - name: Run solr image
+#    docker: image="ckan/solr" name="solr" state=running
+#    sudo: yes
+
+#  - name: Run ckan image
+#    docker: image="ckan/ckan" name="ckan" ports="80:80" links=db:db,solr:solr state=running
+#    sudo: true
+
+  - name: Install postgresql as a system ctl service
+    copy: src=files/db.service dest=/etc/systemd/system/db.service
     sudo: yes
 
-  - name: Run solr image
-    docker: image="ckan/solr" name="solr" state=running
+  - name: Install solr as a system ctl service
+    copy: src=files/solr.service dest=/etc/systemd/system/solr.service
     sudo: yes
 
-  - name: Run ckan image
-    docker: image="ckan/ckan" name="ckan" ports="80:80" links=db:db,solr:solr state=running
-    sudo: true
+  - name: Install ckan as a system ctl service
+    copy: src=files/ckan.service dest=/etc/systemd/system/ckan.service
+    sudo: yes
+
+  - name: Reload systemctl
+    command: systemctl --system daemon-reload
+    sudo: yes
+
+  - name: Enable and restart db
+    service: name=db.service enabled=yes state=restarted
+    sudo: yes
+
+  - name: Enable and restart solr
+    service: name=solr.service enabled=yes state=restarted
+    sudo: yes
+
+  - name: Enable and restart ckan
+    service: name=ckan.service enabled=yes state=restarted
+    sudo: yes

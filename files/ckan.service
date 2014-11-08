@@ -1,0 +1,16 @@
+[Unit]
+Description=CKAN Service
+
+After=docker.service
+Requires=docker.service db.service solr.service
+
+[Service]
+Restart=on-failure
+RestartSec=10
+ExecStartPre=-/usr/bin/docker kill ckan
+ExecStartPre=-/usr/bin/docker rm ckan
+ExecStart=/usr/bin/docker run -p 80:80 --link db:db --link solr:solr --name ckan ckan/ckan
+ExecStop=/usr/bin/docker stop ckan
+
+[Install]
+WantedBy=multi-user.target
