@@ -1,0 +1,1 @@
+vagrant ssh -c "sudo docker run -i -t --link db:db --link solr:solr ckan/ckan /sbin/my_init -- /bin/bash -c '/usr/lib/ckan/default/bin/paster $*'"

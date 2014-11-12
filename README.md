@@ -18,14 +18,22 @@ vagrant box add ffuenf/debian-7.7.0-amd64 https://googledrive.com/host/0B83ZToJ3
 ```
   * (```vagrant provision```) Only necessary if you modify the playbook or need to provisioning an existing and running vagrant VM.
 
-You should be able to access CKAN at ```http://localhost:8080``` 
+You should be able to access CKAN at ```http://192.168.33.50``` 
+
+# Maintenance
+
+You can run maintenance commands with ```./paster.sh``` for instance to make ```someuser``` a sysadmin
+
+```
+./paster.sh  --plugin=ckan sysadmin -c /etc/ckan/default/ckan.ini add someuser
+```
 
 ## ToDO
 
   * Create custom docker ckan build.
   * Link custom docker ckan build to host docker volume.
   * Link host docker volume to vagrant shared folder.
-  * Create ansible tags for executing maintenance commands (http://docs.ckan.org/en/latest/maintaining/installing/install-using-docker.html#running-maintenance-commands)
+  * ~~Create ansible tags for executing maintenance commands (http://docs.ckan.org/en/latest/maintaining/installing/install-using-docker.html#running-maintenance-commands)~~
   * Create shell script for executing ansible tags (as in https://github.com/iilab/ltfhc-config/blob/master/run.sh)
 
 This should allow to develop directly in a directory of the developer's computer and be able to execute basic maintenance tasks from outside the vagrant box.
